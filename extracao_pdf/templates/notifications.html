@@ -1,0 +1,177 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+    .notifications-container {
+        margin-top: 20px;
+    }
+    .post {
+        position: relative;
+        color: #555;
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+    }
+    .post.unread {
+        font-weight: bold;
+        background-color: #ffffe0;
+        border-left: 5px solid #ffcc00;
+    }
+    .post .date {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0.7;
+    }
+    .post .icon {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.3s;
+    }
+    .post:hover .icon {
+        transform: scale(1.1);
+    }
+    .post h3 {
+        color: #333;
+        margin: 0 0 10px 60px;
+        font-size: 14px;
+    }
+    .post p {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 10px 60px;
+    }
+    .post a {
+        color: #51af3e;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+    .post a:hover {
+        color: #37bd8c;
+    }
+    .mark-read-form {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+    }
+    .mark-read-form button {
+        background-color: #51af3e;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    .mark-read-form button:hover {
+        background-color: #37bd8c;
+        transform: scale(1.05);
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .pagination a {
+        margin: 0 5px;
+        padding: 10px 15px;
+        color: #51af3e;
+        text-decoration: none;
+        border: 1px solid #51af3e;
+        border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+    .pagination a:hover {
+        background-color: #51af3e;
+        color: #fff;
+    }
+    .pagination .current {
+        margin: 0 5px;
+        padding: 10px 15px;
+        background-color: #51af3e;
+        color: #fff;
+        border: 1px solid #51af3e;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container notifications-container">
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="material-icons"></i> Notificações</h2>
+        </div>
+        <div class="card-body">
+            <ul class="posts list-group">
+                {% for item in notifications_data %}
+                    {% with notification=item.notification card_data=item.card_data %}
+                        <li class="post list-group-item {% if notification.unread %}unread{% endif %}">
+                            <span class="date">{{ notification.timestamp|date:"d/m/Y H:i" }}</span>
+                            <div class="icon">
+                                {% if notification.unread %}
+                                    <img src="https://img.icons8.com/?size=100&id=1708&format=png&color=000000" alt="Notification Icon" style="width: 24px; height: 24px;">
+                                {% else %}
+                                    <img src="https://img.icons8.com/?size=100&id=11642&format=png&color=000000" alt="Notification Icon" style="width: 24px; height: 24px;">
+                                {% endif %}
+                            </div>
+                            <h3>{{ notification.actor }}</h3>
+                            <p>
+                                {% if card_data and card_data.board_id and card_data.card_id %}
+                                    <a href="{% url 'kanban_board' card_data.board_id %}?cardId={{ card_data.card_id }}" target="_blank">{{ notification.description }}</a>
+                                {% else %}
+                                    <a href="/kanban/1" target="_blank">{{ notification.description }}</a>
+                                {% endif %}
+                            </p>
+                            {% if notification.unread %}
+                                <form method="post" action="{% url 'mark_as_read' notification.id %}" class="mark-read-form">
+                                    {% csrf_token %}
+                                    <button type="submit">Marcar como lida</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endwith %}
+                {% empty %}
+                    <p>Sem notificações.</p>
+                {% endfor %}
+            </ul>
+            <div class="pagination">
+                {% if notifications.has_previous %}
+                    <a href="?page={{ notifications.previous_page_number }}">&laquo; Anterior</a>
+                {% endif %}
+
+                {% for num in notifications.paginator.page_range %}
+                    {% if notifications.number == num %}
+                        <span class="current">{{ num }}</span>
+                    {% else %}
+                        <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if notifications.has_next %}
+                    <a href="?page={{ notifications.next_page_number }}">Próxima &raquo;</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl8f3Zl6Bz8i0O00FHChc3+0X7jblGk3m3zt26RBS6v1zKbhWr7j5jKjU0" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgcjmjvBrHxEHEWvHmJAKfYwELqE4z4grQXZv6G7A8Y2zpQ8Er3" crossorigin="anonymous"></script>
+{% endblock %}

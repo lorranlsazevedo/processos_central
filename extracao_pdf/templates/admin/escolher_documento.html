@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+    .container {
+        margin-top: 20px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>Escolher Documento para o Processo: {{ processo.numero }}</h2>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome do Modelo</th>
+                        <th>Tipo de Documento</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for modelo in modelos %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin:extracao_pdf_mymodel_change' modelo.id %}">{{ modelo.nome_modelo }}</a>
+                            </td>
+                            <td>{{ modelo.tipo_documento.nome }}</td>
+
+                            <td>
+                                <a href="{% url 'gerar_docx' modelo_id=modelo.pk processo_id=processo.pk %}" class="btn btn-primary">
+                                    Gerar Documento
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Nenhum modelo disponível.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl8f3Zl6Bz8i0O00FHChc3+0X7jblGk3m3zt26RBS6v1zKbhWr7j5jKjU0" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgcjmjvBrHxEHEWvHmJAKfYwELqE4z4grQXZv6G7A8Y2zpQ8Er3" crossorigin="anonymous"></script>
+{% endblock %}

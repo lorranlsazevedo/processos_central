@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { text-align: center; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .no-border { border: none; }
+    </style>
+</head>
+<body>
+    <h1>Relatório Publicação</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome do Leilão</th>
+                <th>Vara</th>
+                <th>Data do Leilão</th>
+                <th>Leiloeiro</th>
+                <th>Coluna Kanban</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for card in cards %}
+            <tr>
+                <td>{{ card.leilao.nome }}</td>
+                <td>{{ card.vara.nome }}</td>
+                <td>{{ card.primeira_data }} - {{ card.ultima_data }}</td>
+                <td>{{ card.leiloeiro.nome }}</td>
+                <td>{{ card.list.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

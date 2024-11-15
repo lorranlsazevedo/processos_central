@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'relatorio.css' %}">
+<style>
+    .container {
+        margin-top: 20px;
+    }
+    .AzXOpc-qWD73c {
+        margin: 15px;
+        padding: 15px;
+        text-align: center;
+        width: 200px;
+        height: 250px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+    .AzXOpc-qWD73c:hover {
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    .LKOlif {
+        font-weight: bold;
+        margin-top: 10px;
+        color: #032C35; /* Cor do texto dos títulos */
+    }
+    .RwTPtf {
+        color: #032C35;
+        font-size: 14px;
+    }
+    .VzuMDc {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80px;
+    }
+    .Md9X2e {
+        width: 48px;
+        height: 48px;
+    }
+    .PXGuec {
+        text-decoration: none; /* Remove underline do link */
+        color: inherit; /* Mantém a cor do texto ao redor */
+    }
+    .PXGuec:hover {
+        color: #032C35; /* Define a cor ao passar o mouse */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Relatórios</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="AzXOpc-qWD73c">
+                <a href="{% url 'admin_relatorios_board_1' %}" class="PXGuec">
+                    <div class="VzuMDc">
+                        <!-- Ícone do relatório Jurídico Editais -->
+                        <i class="far fa-clipboard fa-3x" title="Visualizar Jurídico Editais" alt="Jurídico Editais"></i>
+                    </div>
+                    <div class="LKOlif">Jurídico Editais</div>
+                    <div class="RwTPtf">Ver insights relevantes sobre o Jurídico Editais</div>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="AzXOpc-qWD73c">
+                <a href="{% url 'relatorio_simples_board_3' %}" class="PXGuec">
+                    <div class="VzuMDc">
+                        <!-- Ícone do relatório de Publicação -->
+                        <i class="far fa-newspaper fa-3x" title="Visualizar Publicações" alt="Publicações"></i>
+                    </div>
+                    <div class="LKOlif">Publicação</div>
+                    <div class="RwTPtf">Ver insights relevantes sobre o Jurídico Publicações</div>
+                </a>
+            </div>
+        </div>
+        <!-- Continue adicionando colunas conforme necessário -->
+    </div>
+</div>
+{% endblock %}

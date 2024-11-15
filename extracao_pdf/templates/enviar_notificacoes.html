@@ -1,0 +1,21 @@
+
+
+{% block content %}
+  <h1>Enviar Notificação</h1>
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label for="destinatario">Destinatário:</label>
+      <select name="destinatario" id="destinatario">
+        {% for usuario in usuarios %}
+          <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="mensagem">Mensagem:</label>
+      <textarea name="mensagem" id="mensagem"></textarea>
+    </div>
+    <button type="submit">Enviar</button>
+  </form>
+{% endblock %}

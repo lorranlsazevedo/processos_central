@@ -1,0 +1,950 @@
+.board-container {
+    padding-top: 20px; /* Espaço para o cabeçalho fixo */
+    background-color: #f4f5f7;
+    height: calc(100vh - 150px);
+    overflow-x: scroll; /* Permite rolagem lateral */
+    position: relative;
+}
+
+.comment {
+    width: 99%;
+    border: none !important;
+    padding: 3px !important;
+    border-radius: 4px;
+    background: #f1f1f1;
+}
+
+.board-header {
+    position: sticky;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center; /* Distribui o espaço entre os elementos */
+    align-items: center; /* Alinhamento vertical */
+    background-color: #032C35;
+    padding: 10px;
+    margin: 0 auto;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 4px;
+    width: 100%; /* Assegura que o cabeçalho acompanhe a largura da área de rolagem */
+    box-sizing: border-box; /* Padding incluso na largura */
+}
+
+.board-header h1 {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    text-align: center;
+    margin: auto;
+}
+
+.filters-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    background-color: #f4f5f7;
+}
+
+/* Estilos adicionais para o filtro e botões dentro do cabeçalho */
+
+#filtro-grupo, .filter-button {
+    margin: 0 10px;
+}
+
+#filtro-grupo {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #032C35;
+    color: white;
+    border: none;
+}
+#filtro-responsavel {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #032C35;
+    color: white;
+    border: none;
+}
+
+.filter-button {
+    text-align: right;
+    margin: 20px;
+    display: flex;
+    width: 70%;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.filter-input {
+    display: none;
+    width: 60%;
+}
+
+#clear-filters-button {
+    font-size: 0.875rem;  /* Tamanho de fonte menor */
+    padding: 4px 8px;     /* Reduz o espaçamento interno */
+    border: 1px solid #ccc; /* Bordas mais finas e suaves */
+    background-color: #f8f9fa; /* Cor de fundo leve */
+    color: #6c757d;       /* Cor do texto mais discreta */
+    transition: background-color 0.3s, color 0.3s; /* Transição suave */
+}
+
+#clear-filters-button:hover {
+    background-color: #e2e6ea; /* Cor de fundo ao passar o mouse */
+    color: #5a6268;           /* Cor do texto ao passar o mouse */
+}
+
+
+
+.board {
+    display: flex;
+    padding: 20px 0;
+    white-space: nowrap;
+    height: auto; /* Altura automática baseada no conteúdo */
+}
+
+.list {
+    background-color: #ebecf0;
+    border-radius: 8px;
+    width: 400px;
+    padding: 15px;
+    margin: 0 10px;
+    display: inline-block;
+    vertical-align: top;
+    height: auto;
+    position: relative;
+}
+
+.list h2 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #032c35;
+    margin-bottom: 10px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    border-radius: 4px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    width: 230px;
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.card-wrapper {
+    z-index: 1; /* Mantém os cards abaixo dos títulos fixos */
+    padding-top: 2px; /* Adiciona espaço suficiente acima dos cards para evitar sobreposição */
+}
+
+.processo {
+    background-color: #032C35;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.processo-info ul {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    gap: 5px;
+    padding: 0;
+    align-items: flex-start;
+}
+
+.processo-info ul li {
+    display: flex;
+    background: #e3e3e3;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, .25);
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    word-wrap: break-word;
+    height: 320px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    white-space: normal;
+    width: 230px;
+}
+
+.card:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.02);
+}
+
+.card:active {
+    background-color: #e0e0e0;
+    transform: scale(0.98);
+}
+
+.card h3 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: #032C35;
+}
+
+.card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.card p strong {
+    color: #333;
+}
+
+.board::-webkit-scrollbar {
+    height: 12px;
+}
+
+.board::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.board::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.board::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.responsavel {
+    position: absolute; /* Posiciona em relação ao '.card' */
+    bottom: 10px; /* Distância do fundo do card */
+    left: 10px; /* Distância da esquerda do card */
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #0079bf;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 5px; /* Ajuste conforme necessário */
+    cursor: pointer;
+}
+
+.card-responsavel {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.responsavel-nome {
+    display: none; /* Nome oculto por padrão */
+    margin-left: 5px;
+    color: #032C35;
+    font-weight: bold;
+}
+
+.card-responsavel:hover .responsavel-nome {
+    display: block;
+}
+
+.modal {
+    display: none; /* Oculto por padrão */
+    position: fixed; /* Fica fixo na tela */
+    z-index: 11; /* Fica sobre outros elementos */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Habilita scroll se necessário */
+    background-color: rgb(0, 0, 0); /* Fundo preto */
+    background-color: rgba(0, 0, 0, 0.4); /* Fundo preto com opacidade */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% de margem superior e centraliza horizontalmente */
+    padding: 20px;
+    border: none !important;
+    width: 80%; /* Largura do modal */
+    max-width: 600px; /* Largura máxima */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+    animation: fadeIn 0.5s;
+}
+
+.modal a, .btn-link {
+    color: #032C35 !important;
+}
+
+button.btn.btn-secondary.mt-3.btn-fechar-modal {
+    background: darkred;
+    font-size: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button.btn.btn-secondary.mt-3.btn-fechar-modal:hover {
+    background: #c52626;
+    color: #fff;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.comments-section {
+    margin-top: 20px;
+}
+
+.comment {
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.comment strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+@import url(//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css);
+
+.detailBox {
+    width: 100%;
+    border: 1px solid #bbb;
+    margin: 5px 0;
+}
+
+.titleBox {
+    background-color: #fdfdfd;
+    padding: 10px;
+}
+
+.titleBox label {
+    color: #444;
+    margin: 0;
+    display: inline-block;
+}
+
+.commentBox {
+    padding: 10px;
+    border-top: 1px dotted #bbb;
+}
+
+.commentBox .form-group:first-child, .actionBox .form-group:first-child {
+    width: 75%;
+}
+
+.commentBox .form-group:nth-child(2), .actionBox .form-group:nth-child(2) {
+    width: 20%;
+}
+
+.actionBox .form-group * {
+    width: 100%;
+}
+
+.taskDescription {
+    margin-top: 10px 0;
+}
+
+.commentList {
+    padding: 0;
+    list-style: none;
+    max-height: 200px;
+    overflow: auto;
+    width: 100% !important;
+}
+
+.commentList li {
+    margin: 0;
+    margin-top: 10px;
+}
+
+.commentList li > div {
+    display: table-cell;
+}
+
+.commenterName {
+    width: auto;
+    margin-right: 5px;
+    height: 100%;
+    float: left;
+    font-weight: bold;
+}
+
+.commentText p {
+    margin: 0;
+}
+
+.sub-text {
+    color: #aaa;
+    font-family: verdana;
+    font-size: 11px;
+}
+
+.actionBox {
+    border-top: 1px solid #bbb;
+    padding: 5px 10px;
+}
+
+.commentHeader {
+    display: flex;
+    align-items: center;
+}
+
+.commentContent {
+    margin-left: 35px;
+}
+
+grupos-responsaveis {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px; /* Espaçamento entre tags, se necessário */
+}
+
+.grupos-responsaveis span {
+    background-color: #ccc; /* Cor padrão, será substituída pelo estilo dinâmico */
+    padding: 2px 5px;
+    border-radius: 5px;
+    white-space: nowrap; /* Evita que a tag quebre em duas linhas */
+
+}
+
+.column-tag {
+    position: absolute;
+    top: 25px;
+    right: 10px;
+    background-color: #f39c12;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-align: center;
+    z-index: 12;
+}
+
+#modal-content ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: max-content;
+    flex-direction: row;
+}
+
+.processosAgregados {
+    width: 100% !important;
+    padding: 0;
+}
+
+#modal-content ul li {
+    display: flex;
+    background: #e3e3e3;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    width: max-content;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+#identificador-publicjud-dropdown {
+    position: relative;
+    display: inline-block;
+    float: right; /* Alinha o dropdown específico à direita do card */
+}
+
+#identificador-publicjud-dropdown .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* Alinha o conteúdo do dropdown à direita */
+    background-color: #f9f9f9;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#identificador-publicjud-dropdown:hover .dropdown-content {
+    display: block; /* Mostra o conteúdo do dropdown ao passar o mouse */
+}
+
+.identificador {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: space-between;
+    height: auto;
+    transition: opacity 0.3s ease;
+}
+.identificador.hidden {
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    padding: 10px;
+    width: 500px;
+    margin-top: 10px;
+    border-radius: 5px;
+    right: 0;
+}
+
+div#modelos-container {
+    margin-top: 15px;
+    width: max-content;
+    overflow: auto;
+    position: absolute;
+    right: 20px;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+span.fecharDocumentos {
+    position: relative;
+    right: -60px;
+    background: red;
+    padding: 5px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .dropdown-content {
+        width: 320px;
+        left: 0;
+    }
+
+    table.table.table-striped {
+        background: #fff;
+        border-radius: 2px;
+        box-shadow: 1px 1px 50px;
+        margin-left: -30px;
+        border: none !important;
+    }
+
+    a.btn.btn-primary {
+        color: #fff !important;
+        font-size: 14px;
+        width: 140px;
+    }
+
+    ul.ul_datas {
+        flex-wrap: wrap !important;
+        flex-direction: column !important;
+    }
+}
+
+p.datas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+ul.ul_datas {
+    padding: 0;
+    margin-top: -43px;
+    margin-left: 50px;
+}
+
+.dropdown-content p {
+    color: black;
+    padding: 12px 16px;
+    margin: 0;
+}
+
+.dropdown-content p:hover {
+    background-color: #f1f1f1;
+}
+
+/* Mostrar o dropdown ao clicar no botão */
+.dropdown-content.show {
+    display: block;
+}
+
+.checklist-container h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #343a40;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+}
+
+.checklist-item.completed-task {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+.checklist-item .task-checkbox {
+    margin-right: 10px;
+}
+
+.checklist-item span {
+    flex-grow: 1; /* Permite que o nome da tarefa ocupe todo o espaço disponível */
+    margin-right: 10px; /* Espaçamento entre o nome da tarefa e o botão de remover */
+    color: #343a40;
+}
+
+.checklist-item button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.checklist-item button:hover {
+    color: #de5361;
+    background: transparent !important;
+}
+
+.checklist-item button i {
+    margin-left: 5px;
+}
+
+.checklist-input-container {
+    display: flex;
+    margin-top: 10px;
+}
+
+.checklist-input-container .form-control {
+    border-radius: 0;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.checklist-input-container .btn-primary {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+#add-task-btn {
+    display: flex;
+    align-items: center;
+}
+
+.checklist-progress {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #28a745; /* verde */
+}
+
+.tooltip {
+    position: relative;
+    cursor: pointer;
+    border-bottom: 1px dotted black; /* Indicativo de que há mais informação */
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.autocomplete-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.form-group {
+    margin: 0;
+}
+
+.form-control {
+    min-width: 180px;
+    max-width: 250px;
+    padding: 8px 12px;
+    font-size: 16px;
+}
+
+/* Agrupamento do campo de texto e botão de pesquisa */
+.search-group {
+    display: flex;
+    align-items: center;
+}
+
+#filter {
+    width: 100%;
+    max-width: 400px;
+}
+
+#filter-button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+}
+
+.btn {
+    height: 40px;
+}
+
+#autocomplete-suggestion {
+    pointer-events: none;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 100%;
+    max-width: 1220px;
+    top: -55px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+    border-bottom: 2px solid #032c35;
+    padding-bottom: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.checklist-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.checklist-container h3 {
+    margin-bottom: 15px;
+    color: #032c35;
+}
+
+.list-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.btn {
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+a.btn.btn-primary {
+    color: #fff !important;
+}
+
+.btn-primary {
+    background-color: #032c35 !important;
+    border: none;
+    color: #fff !important;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #032c35;
+    opacity: 0.8;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#change-responsavel-container {
+    align-items: center;
+    gap: 5px;
+}
+
+#change-responsavel-select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+ul#checklist {
+    display: flex;
+    width: 100%;
+    max-height: 335px;
+    overflow: auto;
+}
+
+ul#checklist li {
+    width: 100%;
+}
+
+.modal-header {
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: space-between;
+    border-bottom: none !important;
+}
+
+.modal-header-descricao, div#modal-body-descricao {
+    max-height: 725px;
+    height: 100%;
+    overflow: auto;
+}
+
+.modal-header-descricao {
+    width: 60%;
+    padding-right: 15px;
+}
+
+div#modal-body-descricao {
+    width: 35%;
+}
+
+ul.ul_arquivos {
+    padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .modal-header-descricao, div#modal-body-descricao {
+        width: 100% !important;
+    }
+
+    .modal-header {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+    }
+
+    div#modelos-container {
+        width: 100%;
+        right: 0;
+    }
+
+    table.table.table-striped {
+        box-shadow: inherit;
+        margin-left: inherit;
+    }
+
+}

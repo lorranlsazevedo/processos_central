@@ -1,0 +1,319 @@
+.board-container {
+    padding-top: 70px; /* Espaço para o cabeçalho fixo */
+    background-color: #f4f5f7;
+    height: calc(100vh - 150px);
+    overflow-x: scroll; /* Permite rolagem lateral */
+    position: relative;
+}
+
+.board-header {
+    position: sticky;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center; /* Distribui o espaço entre os elementos */
+    align-items: center; /* Alinhamento vertical */
+    background-color: #0079bf;
+    padding: 10px;
+    margin: 0 auto;
+    color: #fff;
+    font-size: 18px;
+    border-radius: 8px;
+    width: 100%; /* Assegura que o cabeçalho acompanhe a largura da área de rolagem */
+    box-sizing: border-box; /* Padding incluso na largura */
+}
+.filters-container {
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    position: sticky;
+    left: 0;
+    right: 0;
+    background-color: #f4f5f7;
+}
+
+/* Estilos adicionais para o filtro e botões dentro do cabeçalho */
+
+#filtro-grupo, .filter-button {
+    margin: 0 10px;
+}
+.filter-button {
+    text-align: right;
+    margin: 20px;
+}
+.filter-input {
+    display: none;
+    text-align: center;
+    margin-bottom: 20px;
+}
+.board {
+    display: flex;
+    padding: 20px 0;
+    white-space: nowrap;
+    height: auto; /* Altura automática baseada no conteúdo */
+}
+.list {
+    background-color: #ebecf0;
+    border-radius: 8px;
+    width: 400px;
+    padding: 15px;
+    margin: 0 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: inline-block;
+    vertical-align: top;
+    height: auto;
+}
+.list h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.card-wrapper {
+    margin-bottom: 15px;
+}
+.processo {
+    background-color: #0079bf;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+.card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(9,30,66,.25);
+    padding: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    word-wrap: break-word;
+    height: 320px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    white-space: normal;
+    width: 230px;
+}
+.card:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.02);
+}
+.card:active {
+    background-color: #e0e0e0;
+    transform: scale(0.98);
+}
+.card h3 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: #0079bf;
+}
+.card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+.card p strong {
+    color: #333;
+}
+.board::-webkit-scrollbar {
+    height: 12px;
+}
+.board::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.board::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+.board::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+.responsavel {
+    position: absolute;  /* Posiciona em relação ao '.card' */
+    bottom: 10px;        /* Distância do fundo do card */
+    left: 10px;          /* Distância da esquerda do card */
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #0079bf;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 5px; /* Ajuste conforme necessário */
+    cursor: pointer;
+}
+.card-responsavel {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+.responsavel-nome {
+    display: none;  /* Nome oculto por padrão */
+    margin-left: 5px;
+    color: #0079bf;
+    font-weight: bold;
+}
+
+.card-responsavel:hover .responsavel-nome {
+    display: block;
+}
+
+.modal {
+    display: none; /* Oculto por padrão */
+    position: fixed; /* Fica fixo na tela */
+    z-index: 1; /* Fica sobre outros elementos */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Habilita scroll se necessário */
+    background-color: rgb(0,0,0); /* Fundo preto */
+    background-color: rgba(0,0,0,0.4); /* Fundo preto com opacidade */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* 5% de margem superior e centraliza horizontalmente */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Largura do modal */
+    max-width: 600px; /* Largura máxima */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    animation: fadeIn 0.5s;
+}
+
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.comments-section {
+    margin-top: 20px;
+}
+
+.comment {
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.comment strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+@import url(//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css);
+
+.detailBox {
+    width: 100%;
+    border: 1px solid #bbb;
+    margin: 20px 0;
+}
+.titleBox {
+    background-color: #fdfdfd;
+    padding: 10px;
+}
+.titleBox label {
+    color: #444;
+    margin: 0;
+    display: inline-block;
+}
+.commentBox {
+    padding: 10px;
+    border-top: 1px dotted #bbb;
+}
+.commentBox .form-group:first-child, .actionBox .form-group:first-child {
+    width: 75%;
+}
+.commentBox .form-group:nth-child(2), .actionBox .form-group:nth-child(2) {
+    width: 20%;
+}
+.actionBox .form-group * {
+    width: 100%;
+}
+.taskDescription {
+    margin-top: 10px 0;
+}
+.commentList {
+    padding: 0;
+    list-style: none;
+    max-height: 200px;
+    overflow: auto;
+}
+.commentList li {
+    margin: 0;
+    margin-top: 10px;
+}
+.commentList li > div {
+    display: table-cell;
+}
+.commenterName {
+    width: auto;
+    margin-right: 5px;
+    height: 100%;
+    float: left;
+    font-weight: bold;
+}
+.commentText p {
+    margin: 0;
+}
+.sub-text {
+    color: #aaa;
+    font-family: verdana;
+    font-size: 11px;
+}
+.actionBox {
+    border-top: 1px dotted #bbb;
+    padding: 10px;
+}
+
+.commentHeader {
+    display: flex;
+    align-items: center;
+}
+.commentContent {
+    margin-left: 35px;
+}
+grupos-responsaveis {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;  /* Espaçamento entre tags, se necessário */
+}
+
+.grupos-responsaveis span {
+    background-color: #ccc;  /* Cor padrão, será substituída pelo estilo dinâmico */
+    padding: 2px 5px;
+    border-radius: 5px;
+    white-space: nowrap; /* Evita que a tag quebre em duas linhas */
+
+}

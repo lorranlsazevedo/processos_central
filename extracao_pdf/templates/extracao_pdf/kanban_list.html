@@ -1,0 +1,125 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<!-- Incluindo CSS personalizado -->
+<link rel="stylesheet" href="{% static 'relatorio.css' %}">
+<style>
+    .container {
+        margin-top: 20px;
+    }
+
+    .AzXOpc-qWD73c {
+        margin: 15px;
+        padding: 15px;
+        text-align: center;
+        width: 200px;
+        height: 250px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .AzXOpc-qWD73c:hover {
+        background: #f5f5f5;
+        transition: all .3s;
+        transform: translateY(-5px);
+        box-shadow: 0 25px 20px #00000029, 0 -1px 2px #0000001a !important;
+    }
+
+    .LKOlif {
+        font-weight: bold;
+        margin-top: 10px;
+        color: #032C35;
+    }
+
+    .RwTPtf {
+        color: #032C35;
+        font-size: 14px;
+    }
+
+    .VzuMDc {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80px;
+        color: #032C35;
+    }
+
+    .Md9X2e {
+        width: 48px;
+        height: 48px;
+    }
+
+    .PXGuec {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .PXGuec:hover {
+        color: #032C35;
+    }
+
+    h2.my-4 {
+        text-transform: capitalize;
+        color: #032c35;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .col-md-4, h2 .my-4 {
+        display: flex;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4">Quadros Kanban</h2>
+    <div class="row">
+        <!-- Quadro Kanban: Gestão de Processos -->
+        <div class="col-md-4">
+            <a href="{% url 'kanban_board' board_id=1 %}" class="PXGuec">
+                <div class="AzXOpc-qWD73c">
+                    <div class="VzuMDc">
+                        <i class="fas fa-project-diagram fa-3x" title="Gestão de Processos"
+                           alt="Gestão de Processos"></i>
+                    </div>
+                    <div class="LKOlif">Gestão de Processos</div>
+                    <div class="RwTPtf">Quadro para controle de prazos e processos</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Quadro Kanban: Gestão de Publicações -->
+        <div class="col-md-4">
+            <a href="{% url 'kanban_board' board_id=3 %}" class="PXGuec">
+                <div class="AzXOpc-qWD73c">
+                    <div class="VzuMDc">
+                        <i class="fas fa-newspaper fa-3x" title="Gestão de Publicações" alt="Gestão de Publicações"></i>
+                    </div>
+                    <div class="LKOlif">Gestão de Publicações</div>
+                    <div class="RwTPtf">Quadro para controle de publicações</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Quadro Kanban adicional: Card Grid Layout -->
+        <div class="col-md-4">
+            <a href="#" class="PXGuec">
+                <div class="AzXOpc-qWD73c">
+                    <div class="VzuMDc">
+                        <i class="fas fa-th fa-3x" title="Card Grid Layout" alt="Card Grid Layout"></i>
+                    </div>
+                    <div class="LKOlif">Card Grid Layout</div>
+                    <div class="RwTPtf">Demo of pixel perfect pure CSS simple responsive card grid layout</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

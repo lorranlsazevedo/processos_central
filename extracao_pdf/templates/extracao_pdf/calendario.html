@@ -1,0 +1,71 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+<style>
+    .container {
+        margin-top: 20px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+    #calendar-container {
+        padding: 20px;
+    }
+    #calendar {
+        width: 100%;
+        height: 80vh; /* Ajustar conforme necessário */
+    }
+    .fc-event, .fc-daygrid-day-number, .fc-col-header-cell-cushion {
+        color: #000 !important; /* Define a cor da fonte dos eventos */
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h2>Calendário de Leilões</h2>
+        </div>
+        <div class="card-body" id="calendar-container">
+            <div id="calendar"></div>
+            <div id="error-message" class="error"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/pt-br.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            events: 'http://127.0.0.1:8000/api/leiloes/',
+            eventDidMount: function(info) {
+                // Formatar a data e hora de início para exibição
+                const eventStart = new Date(info.event.start);
+                const formattedStart = eventStart.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+
+                tippy(info.el, {
+                    content: `<strong>${info.event.title}</strong><br>${info.event.extendedProps.description}<br>`,
+                    allowHTML: true,
+                    placement: 'top'
+                });
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

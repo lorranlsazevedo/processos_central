@@ -1,0 +1,984 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'css/kanban.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="board-container">
+    <div class="board-header">
+        <h1>{{ board.name }}</h1>
+    </div>
+
+    <div class="filters-container">
+        <div class="form-group">
+            <select id="filtro-grupo" class="form-control">
+                <option value="todos">Todos os Grupos</option>
+                {% for grupo in grupos_responsaveis %}
+                <option value="{{ grupo.id }}">{{ grupo.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <select id="filtro-responsavel" class="form-control">
+                <option value="todos">Todos os Responsáveis</option>
+                {% for responsavel in responsaveis %}
+                <option value="{{ responsavel.id }}">{{ responsavel.first_name }} {{ responsavel.last_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group search-group" style="flex: 1; display: flex; gap: 8px;">
+            <input type="text" id="filter" class="form-control"
+                   placeholder="Filtrar por número do processo, leilão, leiloeiro ou vara">
+            <button type="button" class="btn btn-primary" id="filter-button">Pesquisar</button>
+            <button class="btn btn-outline-secondary btn-sm btn-discreet" id="clear-filters-button">Limpar Filtros</button>
+        </div>
+    </div>
+
+
+
+    <div class="board" id="kanban-board">
+        {% for list in lists %}
+        <div class="list" data-id="{{ list.id }}">
+            <h2>{{ list.name }} (<span class="card-count">{{ list.cards.count }}</span>)</h2>
+            {% for card in list.ordered_cards %}
+            <div class="card-wrapper"
+                 data-id="{{ card.id }}"
+                 data-is-aggregated="{{ card.is_aggregated|yesno:'1,0' }}"
+                 data-grupo-ids="{% for grupo in card.grupos_responsaveis.all %}{{ grupo.id }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                 data-responsavel-id="{{ card.responsavel.id }}"
+                 data-responsavel="{{ card.responsavel.get_full_name }}"
+                 data-confeccao="{{ card.processo.confeccao }}"
+                 data-classe-processual="{{ card.processo.classe_processual.nome }}"
+                 data-exequentes="{% for exequente in card.processo.exequentes.all %}{{ exequente.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                 data-executados="{% for executado in card.processo.executados.all %}{{ executado.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                 data-terceiros-interessados="{% for terceiro in card.processo.terceiros_interessados.all %}{{ terceiro.nome }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                 data-observacoes="{{ card.processo.observacoes }}"
+                 data-description="{{ card.description }}"
+                 data-leiloeiro="{{card.leiloeiro}}"
+                 data-identificador-publicjud="{{ card.identificador_publicjud }}"
+                 data-processos-agregados="{% for agregado in card.cards_agregados.all %}{{ agregado.processo.numero }}|{{ agregado.processo.id }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                <div class="card" draggable="true" data-id="{{ card.id }}">
+                    <div class="processo-info">
+                        {% if card.processo %}
+                        <div class="processo" data-id="{{ card.processo.id }}"
+                             {% if card.is_aggregated %} style="display: none;" {% endif %}>
+                            {{ card.processo.numero }}
+                        </div>
+                        <h3>{{ card.processo.vara.nome }}</h3>
+                        <p><strong>Leilão:</strong> <span class="leilao-nome">{{ card.processo.leilao.nome }}</span></p>
+                        <ul>
+                            {% for data in card.processo.leilao.datas_leilao.all %}
+                            <li>{{ data.data_hora|date:"d/m/Y H:i" }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p><strong>Leiloeiro:</strong> {{ card.leiloeiro.nome }}</p>
+                        {% else %}
+                        <h3>{{ card.vara.nome }}</h3>
+                        <p><strong>Leilão:</strong> <span class="leilao-nome">{{ card.leilao.nome }}</span></p>
+                        <ul>
+                            {% for data in card.leilao.datas_leilao.all %}
+                            <li>{{ data.data_hora|date:"d/m/Y H:i" }}</li>
+                            {% endfor %}
+                        </ul>
+                        <p><strong>Leiloeiro:</strong> {{ card.leiloeiro.nome }}</p>
+                        {% endif %}
+                    </div>
+                    <!-- Grupos responsáveis com tags coloridas alinhadas no canto inferior direito -->
+                    <div class="grupos-responsaveis"
+                         style="position: absolute; bottom: 10px; right: 10px; color: white; display: flex; align-items: center;">
+                        <!-- Verifica se o card possui bem de alto valor -->
+                        {% if card.alto_valor %}
+                        <span class="tag-alto-valor"
+                              style="background-color: #28a745; padding: 3px 6px; border-radius: 5px; margin-right: 8px; display: flex; align-items: center; justify-content: center; height: 24px; width: 24px;"
+                              title="Bem de alto valor">
+                                <i class="fas fa-dollar-sign" style="margin: 0; font-size: 14px;"></i>
+                            <!-- Ícone do símbolo de dólar -->
+                            </span>
+                        {% endif %}
+                        {{ card.get_grupos_tags|safe }} <!-- Renderiza HTML seguro das tags -->
+                    </div>
+
+                    <!-- Campos ocultos detalhados -->
+                    <div style="display: none;">
+                        <p><strong>Confecção:</strong> {{ card.processo.confeccao }}</p>
+                        <p><strong>Classe Processual:</strong> {{ card.processo.classe_processual.nome }}</p>
+                        <p><strong>Exequentes:</strong>
+                            {% for exequente in card.processo.exequentes.all %}
+                            {{ exequente.nome }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p><strong>Executados:</strong>
+                            {% for executado in card.processo.executados.all %}
+                            {{ executado.nome }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p><strong>Terceiros Interessados:</strong>
+                            {% for interessado in card.processo.terceiros_interessados.all %}
+                            {{ interessado.nome }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p><strong>Comissão (%):</strong> {{ card.processo.comissao }}</p>
+                        <p><strong>Observações:</strong> {{ card.processo.observacoes }}</p>
+                    </div>
+                    <!-- Responsável e comentários -->
+                    {% if card.processo.responsavel %}
+                    <div class="responsavel" title="Responsável: {{ card.responsavel.get_full_name }}">
+                        <span class="avatar">{{ card.responsavel.first_name.0 }}</span>
+                        <span class="responsavel-nome">{{ card.responsavel.get_full_name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="comments" style="display: none;">
+                        {% for comment in card.comments.all %}
+                        <div class="comment">
+                            <div class="commenterName">{{ comment.author.get_full_name }}</div>
+                            <div class="commentText">
+                                <p>{{ comment.content }}</p>
+                                <span class="date sub-text">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% empty %}
+        <p>Nenhuma lista disponível.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal HTML -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 class="modal-title">Detalhes do Processo</h2>
+        <div id="modal-content"></div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extrahead %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Função para carregar e preencher o select com usuários
+    function loadUsers() {
+        fetch('/get-users/')  // Certifique-se de que esta URL está correta
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('change-responsavel-select');
+                if (!select) {
+                    console.error('Elemento select não encontrado');
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Selecione o novo responsável</option>';  // Limpa as opções existentes
+
+                // Verifica se os dados estão corretos
+                console.log('Dados recebidos:', data);
+
+                // Preenche o select com as opções dos usuários
+                data.results.forEach(user => {
+                    // Verifica se os nomes não estão vazios
+                    const fullName = `${user.first_name} ${user.last_name}`.trim();
+                    if (fullName) {  // Adiciona ao select apenas se o nome não estiver vazio
+                        const option = document.createElement('option');
+                        option.value = user.id;  // Define o ID como valor da opção
+                        option.textContent = fullName;  // Define o texto como o nome completo
+                        select.appendChild(option);
+                    }
+                });
+            })
+            .catch(error => console.error('Erro ao carregar usuários:', error));
+    }
+
+    function toggleDropdown() {
+        const dropdownContent = document.querySelector('.dropdown-content');
+        if (dropdownContent) {
+            dropdownContent.classList.toggle('show');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const cards = document.querySelectorAll('.card');
+        const lists = document.querySelectorAll('.list');
+        const filterInput = document.getElementById('filter');
+        const filterForm = document.querySelector('.filter-input');
+        const filterButton = document.getElementById('filter-button');
+        const clearFiltersButton = document.getElementById('clear-filters-button');
+        const groupFilter = document.getElementById('filtro-grupo');
+        const responsavelFilter = document.getElementById('filtro-responsavel');
+
+        let draggedCard = null;
+
+        // Arrastar e soltar cards
+        cards.forEach(card => {
+            card.addEventListener('dragstart', function () {
+                draggedCard = card;
+                setTimeout(() => {
+                    card.classList.add('dragging');
+                }, 0);
+            });
+
+            card.addEventListener('dragend', function () {
+                draggedCard = null;
+                card.classList.remove('dragging');
+            });
+
+            // Adicionando evento de clique para abrir o modal
+            card.addEventListener('click', function () {
+                const cardId = card.getAttribute('data-id');
+                if (cardId) {
+                    showModal(cardId);
+                    history.replaceState(null, null, `?cardId=${cardId}`);
+                } else {
+                    console.error("Erro: cardId não encontrado no card.");
+                }
+            });
+        });
+
+        function updateCardCounts() {
+            lists.forEach(list => {
+                const visibleCards = list.querySelectorAll('.card-wrapper:not([style*="display: none"])');
+                const countSpan = list.querySelector('.card-count');
+                countSpan.textContent = visibleCards.length; // Atualiza o contador
+            });
+        }
+
+        // Função de filtragem combinada por grupo e responsável
+        function filterCards() {
+            const selectedGroupId = groupFilter.value;
+            const selectedResponsavelId = responsavelFilter.value;
+            const filterValue = filterInput.value.toLowerCase();
+
+            const cards = document.querySelectorAll('.card-wrapper');
+
+            cards.forEach(card => {
+                const cardGroupIds = card.getAttribute('data-grupo-ids');
+                const cardResponsavelId = card.getAttribute('data-responsavel-id');
+                const cardText = card.innerText.toLowerCase();
+
+                // Lógica para exibir ou ocultar o card
+                const mostrarPorGrupo = (selectedGroupId === 'todos' || (cardGroupIds && cardGroupIds.split(',').includes(selectedGroupId)));
+                const mostrarPorResponsavel = (selectedResponsavelId === 'todos' || cardResponsavelId === selectedResponsavelId);
+                const mostrarPorFiltro = cardText.includes(filterValue);
+
+                if (mostrarPorGrupo && mostrarPorResponsavel && mostrarPorFiltro) {
+                    card.style.display = '';  // Mostra o card se ele atender aos filtros
+                } else {
+                    card.style.display = 'none';  // Esconde o card se não atender aos filtros
+                }
+            });
+
+            updateCardCounts();  // Atualiza a contagem de cards visíveis após a filtragem
+        }
+
+        // Função para limpar filtros
+        clearFiltersButton.addEventListener('click', function () {
+            // Redefine os valores dos filtros
+            filterInput.value = '';
+            groupFilter.value = 'todos';
+            responsavelFilter.value = 'todos';
+
+            // Mostra todos os cards
+            const cards = document.querySelectorAll('.card-wrapper');
+            cards.forEach(card => {
+                card.style.display = '';
+            });
+
+            updateCardCounts(); // Atualiza a contagem de cards visíveis
+        });
+
+        // Chamada da função de filtragem combinada quando os filtros mudam
+        groupFilter.addEventListener('change', filterCards);
+        responsavelFilter.addEventListener('change', filterCards);
+
+        // Aplicar filtro apenas ao clicar no botão ou pressionar Enter no campo de filtro
+        filterButton.addEventListener('click', filterCards);
+
+        filterInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Evita o envio do formulário
+                filterCards();
+            }
+        });
+
+        // Inicializa a contagem correta quando a página é carregada
+        updateCardCounts();
+
+        // Arrastar e soltar para listas
+        lists.forEach(list => {
+            list.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(list, e.clientY);
+                const draggable = document.querySelector('.dragging');
+                if (draggable) {
+                    if (afterElement == null) {
+                        list.appendChild(draggable.parentElement);
+                    } else {
+                        list.insertBefore(draggable.parentElement, afterElement.parentElement);
+                    }
+                }
+            });
+
+            list.addEventListener('drop', function () {
+                if (draggedCard) {
+                    const newListId = this.getAttribute('data-id');
+                    const cardId = draggedCard.getAttribute('data-id');
+
+                    fetch('/api/move_card/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            card_id: cardId,
+                            new_list_id: newListId
+                        })
+                    }).then(response => response.json())
+                        .then(data => {
+                            if (data.status !== 'success') {
+                                console.error('Error moving card:', data.message);
+                            }
+                        }).finally(() => {
+                        // Atualiza a contagem de cards após mover
+                        updateCardCounts();
+                    });
+                }
+            });
+        });
+
+        // Alternar exibição do filtro
+        filterButton.addEventListener('click', function () {
+            filterForm.style.display = filterForm.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Função para obter o elemento após o qual o card está sendo arrastado
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.card:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return {offset: offset, element: child};
+                } else {
+                    return closest;
+                }
+            }, {offset: Number.NEGATIVE_INFINITY}).element;
+        }
+
+
+        function loadChecklist(cardId) {
+            fetch(`/get_checklist/${cardId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Obtém o elemento modal-body-descricao
+                    const modalBodyDescricao = document.getElementById('modal-body-descricao');
+
+                    // Verifica se a estrutura do checklist já existe, se não, cria a estrutura
+                    let checklistContainer = document.querySelector('.checklist-container');
+                    if (!checklistContainer) {
+                        checklistContainer = document.createElement('div');
+                        checklistContainer.className = 'checklist-container';
+
+                        const checklistHeader = document.createElement('h3');
+                        checklistHeader.textContent = 'Checklist';
+                        checklistContainer.appendChild(checklistHeader);
+
+                        const checklistUl = document.createElement('ul');
+                        checklistUl.id = 'checklist';
+                        checklistUl.className = 'list-group';
+                        checklistContainer.appendChild(checklistUl);
+
+                        modalBodyDescricao.appendChild(checklistContainer);
+                    }
+
+                    // Limpar somente a lista de tarefas dentro do checklist
+                    const checklistUl = document.getElementById('checklist');
+                    checklistUl.innerHTML = '';
+
+                    // Progresso do checklist
+                    let totalTasks = data.tasks.length;
+                    let completedTasks = data.tasks.filter(task => task.completed).length;
+
+                    const checklistProgress = document.createElement('div');
+                    checklistProgress.className = 'checklist-progress';
+                    checklistProgress.textContent = `Progresso: ${completedTasks}/${totalTasks} tarefas completadas`;
+                    checklistUl.appendChild(checklistProgress);
+
+                    // Adicionando as tarefas ao checklist
+                    data.tasks.forEach(task => {
+                        const taskItem = document.createElement('li');
+                        taskItem.className = 'checklist-item';
+                        taskItem.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" data-id="${task.id}" ${task.completed ? 'checked' : ''}>
+                    <span class="${task.completed ? 'completed-task' : ''}">${task.name}</span>
+                    <button class="btn btn-danger btn-sm delete-task-btn" data-id="${task.id}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                        checklistUl.appendChild(taskItem);
+                    });
+
+                    // Adicionar eventos aos checkboxes e botões de remoção
+                    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+                        checkbox.addEventListener('change', function () {
+                            toggleTaskCompletion(this.dataset.id, this.checked);
+                        });
+                    });
+
+                    document.querySelectorAll('.delete-task-btn').forEach(button => {
+                        button.addEventListener('click', function () {
+                            removeTask(this.dataset.id);
+                        });
+                    });
+
+                    // Adicionar o input de novas tarefas (se ainda não foi adicionado)
+                    if (!document.getElementById('add-task-btn')) {
+                        const checklistInputContainer = document.createElement('div');
+                        checklistInputContainer.className = 'checklist-input-container input-group mt-3';
+                        checklistInputContainer.innerHTML = `
+                       <input type="text" id="new-task" class="form-control" placeholder="Nova tarefa">
+                       <button class="btn btn-primary" id="add-task-btn">Adicionar</button>
+                      `;
+                        checklistContainer.appendChild(checklistInputContainer);
+
+                        // Adicionar evento para o botão de adicionar tarefa
+                        document.getElementById('add-task-btn').addEventListener('click', function () {
+                            const newTaskInput = document.getElementById('new-task');
+                            const newTaskName = newTaskInput.value.trim();
+                            if (newTaskName) {
+                                addNewTask(cardId, newTaskName); // Chame uma função para adicionar a nova tarefa
+                                newTaskInput.value = ''; // Limpa o input após adicionar
+                            }
+                        });
+                    }
+                });
+        }
+
+
+        function addNewTask(cardId, taskName) {
+
+            if (cardId) { // Verifica se cardId não é null
+                fetch(`/add_checklist_item/${cardId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: new URLSearchParams({name: taskName})
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            loadChecklist(cardId); // Recarrega o checklist para exibir a nova tarefa
+                            document.getElementById('new-task').value = ''; // Limpa o campo de entrada
+                        } else {
+                            console.error('Erro ao adicionar tarefa:', data.message);
+                        }
+                    });
+            } else {
+                console.error("Erro: cardId não definido.");
+            }
+
+        }
+
+        function toggleTaskCompletion(taskId, completed) {
+            fetch(`/toggle_checklist_item/${taskId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({completed})
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.status !== 'success') {
+                        console.error('Erro ao atualizar tarefa:', data.message);
+                    } else {
+                        // Recarrega o checklist após a atualização
+                        const modalContent = document.getElementById('modal-content');
+                        const cardId = modalContent ? modalContent.getAttribute('data-card-id') : null;
+                        if (cardId) {
+                            loadChecklist(cardId);
+                        }
+                    }
+                });
+        }
+
+        function removeTask(taskId) {
+            fetch(`/remove_checklist_item/${taskId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const taskItem = document.querySelector(`.delete-task-btn[data-id='${taskId}']`).closest('li');
+                        taskItem.remove();
+                        const modalContent = document.getElementById('modal-content');
+                        const cardId = modalContent ? modalContent.getAttribute('data-card-id') : null;
+                        if (cardId) {
+                            loadChecklist(cardId);
+                        }
+                    }
+                });
+        }
+
+
+        // Modal
+        window.showModal = function (cardId) {
+            if (!cardId) {
+                console.error("Erro: cardId não foi fornecido.");
+                return;
+            }
+
+            const cardWrapper = document.querySelector(`.card-wrapper[data-id='${cardId}']`);
+            if (!cardWrapper) {
+                console.error("Erro: cardWrapper não encontrado.");
+                return;
+            }
+
+            // Define o cardId no modal-content para uso posterior
+            const modalContent = document.getElementById('modal-content');
+            if (modalContent) {
+                modalContent.setAttribute('data-card-id', cardId);
+                console.log("Card ID definido no modal:", cardId);
+            } else {
+                console.error("Erro: modalContent não encontrado.");
+                return;
+            }
+
+            const processoElement = cardWrapper.querySelector('.processo');
+            const processoId = processoElement ? processoElement.getAttribute('data-id') : null;
+
+            // Obtenha o listId do card
+            const list = cardWrapper.closest('.list');
+            const listId = list.getAttribute('data-id');
+            const listNameFull = list.querySelector('h2').childNodes[0].nodeValue.trim();
+            const listName = listNameFull.split(' (')[0];
+
+            // Carregar a lista de opções para mover o card
+            const listsOptions = `{% for list in lists %}
+                <option value="{{ list.id }}" {% if list.id == listId %}selected{% endif %}>{{ list.name }}</option>
+            {% endfor %}`;
+
+            const isAggregated = cardWrapper.getAttribute('data-is-aggregated') === '1';
+            const descricaoDoCard = cardWrapper.getAttribute('data-description') || 'Descrição não disponível';
+            const processo = cardWrapper.querySelector('.processo').innerText;
+            // Buscar os processos agregados diretamente do atributo data-processos-agregados
+            const processosAgregados = cardWrapper.getAttribute('data-processos-agregados') || '';
+            const descricaoField = processosAgregados
+                ? `<p><strong>Processos Agregados:</strong></p>
+                   <ul class="processosAgregados">${processosAgregados.split(',').map(processo => {
+                    // Separa número e ID pelo separador '|'
+                    const [numero, id] = processo.trim().split('|');
+                    return `<li><a href="/admin/extracao_pdf/processo/${id}/change/" target="_blank">${numero}</a></li>`;
+                }).join('')}</ul>`
+                : '';
+
+            const vara = cardWrapper.querySelector('h3').innerText;
+            const leilao = cardWrapper.querySelector('.leilao-nome').innerText;
+            const datas = cardWrapper.querySelector('ul').innerHTML;
+            const leiloeiro = cardWrapper.getAttribute('data-leiloeiro') || 'Leiloeiro não encontrado';
+            const identificadorPublicjud = cardWrapper.getAttribute('data-identificador-publicjud') || 'Não encontrado';
+            const responsavelCard = cardWrapper.getAttribute('data-responsavel') || 'Sem Responsável';
+            const confeccao = cardWrapper.getAttribute('data-confeccao') || '';
+            const classeProcessual = cardWrapper.getAttribute('data-classe-processual') || '';
+            const exequentes = cardWrapper.getAttribute('data-exequentes') || '';
+            const executados = cardWrapper.getAttribute('data-executados') || '';
+            const terceirosInteressados = cardWrapper.getAttribute('data-terceiros-interessados') || '';
+            const comissao = cardWrapper.getAttribute('data-comissao') || '';
+            const observacoes = cardWrapper.getAttribute('data-observacoes') || '';
+            const editUrl = `/admin/extracao_pdf/processo/${processoId}/change/`;
+            const addCommentUrl = `/add_comment/${cardId}/`;
+
+            console.log('descricaoDoCard:', descricaoDoCard);
+
+            // Adicionando a chamada para carregar arquivos
+            fetch(`/get_arquivos/${processoId}/`)
+                .then(response => response.json())
+                .then(arquivosData => {
+                    const arquivosHtml = arquivosData.arquivos.map(arquivo => `
+                        <li>
+                            <a href="${arquivo.url}" target="_blank">${arquivo.nome}</a>
+                        </li>
+                    `).join('');
+
+                    const comments = [...cardWrapper.querySelectorAll('.comment')].map(comment => comment.outerHTML).join('');
+
+                    const numeroField = !isAggregated && processo
+                        ? `<p><strong>Número:</strong> <a href="${editUrl}" target="_blank">${processo}</a></p>`
+                        : '';
+
+                    const content = `
+                        <div class="modal-header">
+                        <div class="modal-header-descricao">
+                        ${numeroField}
+                        ${descricaoField}
+                        <p><strong>Vara:</strong> ${vara}</p>
+                        <p><strong>Leilão:</strong> ${leilao}</p>
+                        <p><span class="column-tag">${listName}</span></p>
+                        <p class="datas"><strong>Datas:</strong><ul class="ul_datas">${datas}</ul></p>
+                        <p><strong>Leiloeiro:</strong> ${leiloeiro}</p>
+                        <!-- Trecho do modal onde o select de responsáveis deve aparecer -->
+                        <p><strong>Responsável:</strong> ${responsavelCard} <button class="btn btn-link" onclick="toggleTrocaResponsavel()">Trocar</button></p>
+                        <div id="change-responsavel-container" style="display: none;">
+                            <select id="change-responsavel-select">
+                                <!-- As opções de usuários serão carregadas aqui -->
+                            </select>
+                            <button class="btn btn-primary" onclick="confirmarTrocaResponsavel()">Confirmar</button>
+                        </div>
+
+                        <div class="form-group identificador ${isAggregated ? '' : 'hidden'}">
+                            <label for="identificador-publicjud-input"><strong>Identificador Publicjud:</strong></label>
+                            <input type="text" id="identificador-publicjud-input" class="form-control" value="${identificadorPublicjud}" style="margin-bottom: 10px;">
+                            <button class="btn btn-primary" id="save-publicjud-btn">Salvar Identificador</button>
+                        </div>
+
+                        <!-- Mantém o dropdown de detalhes visível quando não for agregado -->
+                        ${!isAggregated ? `
+                        <div id="identificador-publicjud-dropdown" class="dropdown">
+                            <button class="btn btn-primary">Mostrar mais detalhes</button>
+                            <div class="dropdown-content">
+                                <p><strong>Confecção:</strong> ${confeccao}</p>
+                                <p><strong>Classe Processual:</strong> ${classeProcessual}</p>
+                                <p><strong>Exequentes:</strong> ${exequentes}</p>
+                                <p><strong>Executados:</strong> ${executados}</p>
+                                <p><strong>Terceiros Interessados:</strong> ${terceirosInteressados}</p>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="detailBox">
+                            <div class="titleBox">
+                                <label>Comentários sobre o processo</label>
+                            </div>
+
+                            <div class="actionBox">
+                                <ul class="commentList">${comments}</ul>
+                                <form class="form-inline" id="comment-form" action="${addCommentUrl}" method="post">
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                    <div class="autocomplete-container" style="display: flex; align-items: center; width: 100%;">
+                                        <div class="form-group" style="flex: 1; position: relative;">
+                                            <input class="form-control" type="text" name="content" placeholder="Faça seu comentário" id="comment-input" style="width: 100%;">
+                                            <span id="autocomplete-suggestion" class="autocomplete-suggestion" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%);"></span>
+                                        </div>
+                                        <div class="form-group" style="margin-left: 10px;">
+                                            <button class="btn btn-default" type="submit">Add</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        </div>
+                        <div id="modal-body-descricao" class="modal-body-descricao">
+                        <div class="form-group">
+                        <p><strong>Arquivos:</strong></p>
+                        <ul class="ul_arquivos">${arquivosHtml}</ul>
+                        </div>
+                        <div class="form-group">
+                        <button class="btn btn-primary" onclick="loadDocumentModels(${processoId}, ${listId})">Carregar Documentos</button>
+                            <div id="modelos-container"></div> <!-- Div para carregar os modelos -->
+                        </div>
+
+                        <div class="form-group">
+                            <label for="move-to-list">Mover para:</label>
+                            <select id="move-to-list" class="form-control">
+                                ${listsOptions}
+                            </select>
+                            <button class="btn btn-primary" id="move-card-btn" style="margin-top: 10px;">Mover</button>
+                        </div>
+                        </div>
+                        </div>
+                    `;
+
+                    // Definir o conteúdo do modal
+                    document.getElementById('modal-content').innerHTML = content;
+
+                    // Recarregar o checklist depois que o modal foi preenchido
+                    loadChecklist(cardId);
+
+                    // Exibir o modal
+                    document.getElementById('myModal').style.display = 'flex';
+
+                    loadUsers();
+
+                    // Adicionar evento ao botão de salvar identificador Publicjud
+                    const savePublicjudBtn = document.getElementById('save-publicjud-btn');
+
+                    if (savePublicjudBtn) {
+                        savePublicjudBtn.addEventListener('click', function () {
+                            // Obter o valor do campo input e o ID do card
+                            const identificadorPublicjudInput = document.getElementById('identificador-publicjud-input');
+                            const identificadorPublicjud = identificadorPublicjudInput ? identificadorPublicjudInput.value : '';
+                            const cardId = document.getElementById('modal-content').getAttribute('data-card-id');
+
+                            // Verificar se o identificador e o ID do card estão corretos
+                            if (!identificadorPublicjud || !cardId) {
+                                alert('Por favor, insira um identificador válido e verifique o ID do card.');
+                                return;
+                            }
+
+                            // Enviar a requisição para salvar o identificador
+                            fetch(`/save_publicjud/${cardId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': getCsrfToken()
+                                },
+                                body: JSON.stringify({identificador_publicjud: identificadorPublicjud})
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.status === 'success') {
+                                        alert('Identificador Publicjud atualizado com sucesso.');
+                                        // Atualizar o atributo data-publicjud no card correspondente no DOM
+                                        const cardWrapper = document.querySelector(`.card-wrapper[data-id='${cardId}']`);
+                                        if (cardWrapper) {
+                                            cardWrapper.setAttribute('data-publicjud', identificadorPublicjud);
+                                        }
+                                    } else {
+                                        alert('Erro ao atualizar o identificador: ' + data.message);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Erro na requisição:', error);
+                                    alert('Erro ao enviar a requisição.');
+                                });
+                        });
+                    }
+
+                    // Função auxiliar para obter o CSRF Token (caso necessário)
+                    function getCsrfToken() {
+                        let cookieValue = null;
+                        const cookies = document.cookie.split(';');
+                        for (let i = 0; i < cookies.length; i++) {
+                            const cookie = cookies[i].trim();
+                            if (cookie.substring(0, 10) === 'csrftoken=') {
+                                cookieValue = decodeURIComponent(cookie.substring(10));
+                                break;
+                            }
+                        }
+                        return cookieValue;
+                    }
+
+                    // Função para mover o card
+                    document.getElementById('move-card-btn').addEventListener('click', function () {
+                        const selectedListId = document.getElementById('move-to-list').value;
+                        fetch('/api/move_card/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: JSON.stringify({
+                                card_id: cardId,
+                                new_list_id: selectedListId
+                            })
+                        }).then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    location.reload(); // Recarrega a página após mover o card
+                                } else {
+                                    alert('Erro ao mover o card: ' + data.message);
+                                }
+                            });
+                    });
+
+                    // Adicionar evento de submissão ao formulário de comentário
+                    document.getElementById('comment-form').addEventListener('submit', function (event) {
+                        event.preventDefault();
+                        const commentContent = document.querySelector('input[name="content"]').value;
+
+                        fetch(this.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: new URLSearchParams(new FormData(this))
+                        }).then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    alert(data.error);
+                                } else {
+                                    const newComment = `
+                                    <li>
+                                        <div class="comment">
+                                            <div class="commenterName">${data.author}</div>
+                                            <div class="commentText">
+                                                <p>${data.content}</p>
+                                                <span class="date sub-text">${new Date(data.created_at).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                `;
+                                    const commentList = document.querySelector('.commentList');
+                                    commentList.insertAdjacentHTML('beforeend', newComment);
+                                    document.querySelector('input[name="content"]').value = '';
+                                }
+                            });
+                    });
+
+                    // Configurar o autocomplete
+                    $('#comment-input').on('input', function () {
+                        const input = $(this);
+                        const value = input.val();
+                        const suggestionBox = $('#autocomplete-suggestion');
+
+                        if (value.includes('@')) {
+                            const query = value.split('@').pop();
+                            if (query.length > 0) {
+                                $.ajax({
+                                    url: "{% url 'user_autocomplete' %}",
+                                    data: {
+                                        'term': query
+                                    },
+                                    success: function (data) {
+                                        const users = data.results.map(user => user.username);
+                                        const matchedUser = users.find(user => user.startsWith(query));
+
+                                        if (matchedUser) {
+                                            const suggestion = `${value.split('@')[0]}@${matchedUser}`;
+                                            suggestionBox.text(suggestion);
+                                        } else {
+                                            suggestionBox.text('');
+                                        }
+                                    }
+                                });
+                            } else {
+                                suggestionBox.text('');
+                            }
+                        } else {
+                            suggestionBox.text('');
+                        }
+                    });
+
+                    $('#comment-input').on('keydown', function (e) {
+                        const suggestion = $('#autocomplete-suggestion').text();
+
+                        if ((e.key === 'Tab' || e.key === 'Enter') && suggestion) {
+                            e.preventDefault();
+                            $(this).val(suggestion);
+                            $('#autocomplete-suggestion').text('');
+                        }
+                    });
+                });
+        }
+
+        window.closeModal = function () {
+            document.getElementById('myModal').style.display = 'none';
+            history.replaceState(null, null, `?`);
+            document.getElementById('checklist').innerHTML = '';
+        }
+
+        // Verifica se há um cardId na URL e abre o modal correspondente
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardId = urlParams.get('cardId');
+        if (cardId) {
+            showModal(cardId);
+        }
+    });
+
+    // Função para carregar modelos e gerar documentos no Kanban
+    function loadDocumentModels(processoId, listId) {
+        // Faz a solicitação para a nova view que retorna os modelos no formato JSON
+        fetch(`/get_modelos_kanban/${processoId}/?list_id=${listId}`)
+            .then(response => response.json())
+            .then(data => {
+                const modelosContainer = document.getElementById('modelos-container');
+                modelosContainer.style.display = 'block';
+                if (data.modelos && data.modelos.length > 0) {
+                    let modelosHtml = '<table class="table table-striped"><thead><tr><th>Nome do Modelo</th><th>Tipo de Documento</th><th>Ação<span class="fecharDocumentos" onclick="fecharDocumentModels()">Fechar</span></th></tr></thead><tbody>';
+                    data.modelos.forEach(modelo => {
+                        modelosHtml += `
+                            <tr>
+                                <td>${modelo.nome_modelo}</td>
+                                <td>${modelo.tipo_documento.nome}</td>
+                                <td>
+                                    <a href="/gerar-docx/${modelo.id}/${processoId}/" class="btn btn-primary">
+                                        Gerar Documento
+                                    </a>
+                                </td>
+                            </tr>`;
+                    });
+                    modelosHtml += '</tbody></table>';
+                    modelosContainer.innerHTML = modelosHtml;
+                } else {
+                    modelosContainer.innerHTML = '<p onclick="fecharDocumentModels()">Nenhum modelo disponível.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar modelos:', error);
+                const modelosContainer = document.getElementById('modelos-container');
+                modelosContainer.innerHTML = '<p onclick="fecharDocumentModels()">Erro ao carregar modelos.</p>';
+            });
+    }
+
+    function fecharDocumentModels() {
+        const modal = document.getElementById('modelos-container');
+        modal.style.display = 'none';
+    }
+
+    // Função para alternar a visibilidade do container de troca de responsável
+    function toggleTrocaResponsavel() {
+        const container = document.getElementById('change-responsavel-container');
+        if (container) {
+            container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+        } else {
+            console.error('Container de troca de responsável não encontrado');
+        }
+    }
+
+    // Função para confirmar a troca de responsável
+    function confirmarTrocaResponsavel() {
+        const select = document.getElementById('change-responsavel-select');
+        const selectedUserId = select.value;
+        const cardId = document.getElementById('modal-content').getAttribute('data-card-id');
+
+        if (!selectedUserId) {
+            alert('Por favor, selecione um novo responsável.');
+            return;
+        }
+
+        // Faz uma requisição para atualizar o responsável do card
+        fetch(`/update-responsavel/${cardId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({responsavel_id: selectedUserId})
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Responsável atualizado com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro ao atualizar responsável: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar responsável:', error));
+    }
+</script>
+
+{% endblock %}

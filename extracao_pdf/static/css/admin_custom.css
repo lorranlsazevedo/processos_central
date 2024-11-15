@@ -1,0 +1,4 @@
+/* Static/css/admin_custom.css */
+.row-form-errors {
+    color: red !important; /* Garantindo que o estilo seja aplicado aos erros não associados a um campo específico */
+}

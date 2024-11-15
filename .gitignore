@@ -1,0 +1,18 @@
+# Ignorar arquivos de configuração do ambiente
+.env
+
+# Arquivos de banco de dados SQLite
+*.sqlite3
+django.log
+# Diretório de dependências virtuais
+/venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db 

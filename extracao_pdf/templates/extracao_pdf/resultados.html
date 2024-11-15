@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pré-visualização da Extração</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; }
+        .container { display: flex; flex-direction: row; } /* Assegura que o conteúdo esteja lado a lado */
+        .half { width: 50%; height: 100vh; overflow-y: auto; } /* Define cada coluna para ocupar metade da largura da tela */
+        .visualizacao-pdf {
+            border-right: 1px solid #ccc; /* Linha divisória entre os conteúdos */
+        }
+        .informacoes-processo {
+            padding: 20px;
+        }
+        .botao {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .pdf-page-canvas {
+            width: 100%;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="visualizacao-pdf half" id="pdf-render-container">
+            <!-- O PDF será renderizado aqui -->
+        </div>
+        <div class="informacoes-processo half">
+            <h2>Informações do Processo</h2>
+            <p>Número do Processo: {{ numero_processo }}</p>
+            <a href="{% url 'confirmar_salvar_processo' %}" class="botao">Confirmar e Cadastrar Processo</a>
+        </div>
+    </div>
+
+    <!-- Carregue o PDF.js via CDN ou referencie os arquivos locais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <script>
+        var url = "{{ arquivo_pdf_url }}";  // Certifique-se de usar as chaves de template do Django para interpolar a variável
+
+        function renderPage(page) {
+            var scale = 1; // Ajuste o scale conforme necessário
+            var viewport = page.getViewport({ scale: scale });
+            var container = document.getElementById('pdf-render-container');
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.classList.add('pdf-page-canvas');
+
+            container.appendChild(canvas);
+
+            page.render(renderContext);
+        }
+
+        function renderPages(pdfDoc) {
+            for (var num = 1; num <= pdfDoc.numPages; num++) {
+                pdfDoc.getPage(num).then(renderPage);
+            }
+        }
+
+        pdfjsLib.getDocument(url).promise.then(renderPages).catch(function(error) {
+            console.error("Erro ao carregar o PDF:", error);
+        });
+    </script>
+</body>
+</html>

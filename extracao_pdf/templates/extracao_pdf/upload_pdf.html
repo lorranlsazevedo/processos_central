@@ -1,0 +1,131 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jazzmin %}
+
+{% block extrastyle %}
+<style>
+    .content-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 110px); /* Ajuste a altura se tiver cabeçalho/rodapé */
+        margin-left: 0; /* Remover a margem padrão do AdminLTE */
+    }
+    .upload-card {
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 0.5rem;
+        max-width: 600px; /* Largura máxima do card */
+        width: 100%;
+        margin: auto; /* Centraliza na página */
+    }
+    .custom-file-input {
+        opacity: 0;
+        width: 0.1px;
+        height: 0.1px;
+        position: absolute;
+        z-index: -1;
+    }
+    .custom-file:hover {
+        background-color: #f8f9fa; /* Cor de fundo ao passar o mouse */
+    }
+    .custom-file.dragover {
+        background-color: #e3f2fd; /* Cor de fundo quando um arquivo está sendo arrastado sobre ela */
+        border: 2px dashed #007bff; /* Adiciona uma borda tracejada */
+        border-radius: 0.25rem; /* Mantém o arredondamento dos cantos */
+    }
+    .custom-file-label {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        padding: 0.65rem 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 0;
+    }
+    .custom-file-label:hover {
+        background-color: #e8e8e8;
+    }
+    .upload-btn {
+        width: 100%;
+        background-color: #007bff; /* Cor do botão */
+        color: white;
+        border: none;
+        padding: 0.65rem 1rem;
+        margin-top: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+    .upload-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper p-0">
+    <div class="upload-card">
+        <form method="post" enctype="multipart/form-data" class="p-3 mb-2 bg-light text-dark">
+            {% csrf_token %}
+            <div class="form-group">
+                <h1 class="text-center mb-4">{% trans 'Upload do processo em PDF' %}</h1>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="customFile" name="arquivo">
+                    <label class="custom-file-label" for="customFile">
+                        {% trans 'Escolher Arquivo ou arrastar aqui' %}
+                    </label>
+                </div>
+                <button type="submit" class="upload-btn">{% trans 'Upload' %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var inputFile = document.getElementById('customFile');
+        var customFile = document.querySelector('.custom-file');
+        var customLabel = document.querySelector('.custom-file-label');
+
+        inputFile.addEventListener('change', function (event) {
+            var fileName = event.target.files[0].name;
+            customLabel.textContent = fileName;
+        });
+
+        document.addEventListener('dragover', function (event) {
+            event.preventDefault();
+        });
+
+        document.addEventListener('drop', function (event) {
+            event.preventDefault();
+        });
+
+        customFile.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            customFile.classList.add('dragover');
+        });
+
+        customFile.addEventListener('dragleave', function (event) {
+            event.preventDefault();
+            customFile.classList.remove('dragover');
+        });
+
+        customFile.addEventListener('drop', function (event) {
+            event.preventDefault();
+            customFile.classList.remove('dragover');
+            var files = event.dataTransfer.files;
+            if (files.length > 0) {
+                inputFile.files = files;
+                customLabel.textContent = files[0].name;
+            }
+        });
+    });
+</script>
+{% endblock %}
